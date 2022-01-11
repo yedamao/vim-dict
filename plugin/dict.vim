@@ -3,11 +3,21 @@ if exists('g:loaded_vim_dict')
 endif
 let g:loaded_vim_dict = 1
 
-function! LookUp()
-  " Look up the word
-  let result = system("dict " . expand("<cword>"))
+function! LookUp(type)
+  let saved_unnamed_register = @@
 
-  echo result
+  if a:type ==# 'v'
+    normal! `<v`>y
+  elseif a:type ==# 'char'
+    normal! `[v`]y
+  else
+    return
+  endif
+
+  echo system("dict " . shellescape(@@))
+  let @@ = saved_unnamed_register
+
 endfunction
 
-nnoremap <leader>l :call LookUp()<cr>
+nnoremap <leader>l :set operatorfunc=LookUp<cr>g@
+vnoremap <leader>l :<c-u>call LookUp(visualmode())<cr>
